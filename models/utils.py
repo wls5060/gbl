@@ -3,13 +3,13 @@ import time
 import numpy as np
 import torch
 import torch.nn as nn
-from load_dataset import load_dataset
 import torch.nn.functional as F
 from torch.nn.parameter import Parameter
 import math
 import uuid
 import random
-from model import *
+from models.GAMLP.model import *
+from models.SAGN.model import *
 
 def gen_model(args,in_size,num_classes):
     print("R_GAMLP")
