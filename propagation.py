@@ -1,5 +1,10 @@
 import torch
 import scipy.sparse as sp
+class BasePropagation:
+    def __init__(self, result, adj):
+        self.adj = adj
+        self.result = result @ adj
+    
 def sgc_precompute(features, adj, hops):
     t = perf_counter()
     for i in range(degree):

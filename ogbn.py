@@ -4,7 +4,8 @@ import dgl
 import dgl.function as fn
 from ogb.nodeproppred import PygNodePropPredDataset, Evaluator
 from basedata import BaseData, BaseDataSet
-from utils import to_undirected
+from torch_geometric.utils import to_undirected, dropout_adj
+from operators import LaplacianOperator
 import numpy as np
 
 class Ogbn(BaseDataSet):
@@ -29,6 +30,10 @@ class Ogbn(BaseDataSet):
         weight = torch.ones(len(row))
         
         self.g = BaseData(row, col, weight, N, features, labels)
-        
+    
+    def G(self):
+        return self.g
 test = Ogbn("ogbn-arxiv","dataset/dataset/","official")
-print(test.g)
+trans = LaplacianOperator(1, 0.5)
+adj = trans.adj_normalized(test.G().Adj())
+# print(adj)
