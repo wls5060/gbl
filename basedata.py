@@ -43,6 +43,8 @@ class BaseData:
     def __init__(self, row, col, weight, N, x = None, y = None):
         self.__Adj = sparse_Adj(row, col, weight, N)
         self.__Node = Node(N, x, y)
+    def Adj(self):
+        return self.__Adj.Adj
 class BaseDataSet:
     def __init__(self, name, root):
         self.name = name

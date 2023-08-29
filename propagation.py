@@ -1,4 +1,5 @@
 import torch
+import scipy.sparse as sp
 def sgc_precompute(features, adj, hops):
     t = perf_counter()
     for i in range(degree):
