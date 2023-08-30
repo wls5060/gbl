@@ -22,3 +22,27 @@ def set_seed(seed=0):
     torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
+    return new_edge_index
+
+def batch_train(model, feats, labels, loss_fcn, optimizer, train_loader, evaluator, dataset):
+    model.train()
+    device = labels.device
+    total_loss = 0
+    iter_num = 0
+    y_true = []
+    y_pred = []
+    for batch in train_loader:
+        batch_feats = [x[batch].to(device) for x in feats]
+        output_att = model(batch_feats)
+        y_true.append(labels[batch].to(torch.long))
+        y_pred.append(output_att.argmax(dim=-1))
+        L1 = loss_fcn(output_att, labels[batch].long())
+        loss_train = L1
+        total_loss = loss_train
+        optimizer.zero_grad()
+        loss_train.backward()
+        optimizer.step()
+        iter_num += 1
+    loss = total_loss / iter_num
+    acc = evaluator(torch.cat(y_pred, dim=0), torch.cat(y_true))
+    return loss, acc

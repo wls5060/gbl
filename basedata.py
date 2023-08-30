@@ -49,6 +49,8 @@ class BaseData:
         return self.__Node.x
     def Y(self):
         return self.__Node.y
+    def N(self):
+        return self.__Node.N
 class BaseDataSet:
     def __init__(self, name, root):
         self.name = name

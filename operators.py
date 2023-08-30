@@ -31,7 +31,7 @@ class LaplacianOperator(BaseOperator):
 
         return adj
     
-    def propagation(self, adj, feature, train_idx, valid_idx, test_idx, name):
+    def propagation(self, adj, feature, name):
         self.adj = self.adj_normalized(adj)
 
         x = feature
