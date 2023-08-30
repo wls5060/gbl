@@ -1,5 +1,7 @@
 import scipy.sparse as sp
 import numpy as np
+import torch.nn as nn
+import torch
 class BaseOperator:
     def __init__(self, hops):
         self.hops = hops
@@ -11,7 +13,8 @@ class LaplacianOperator(BaseOperator):
     def __init__(self, hops, r = 0.5):
         super(LaplacianOperator, self).__init__(hops)
         self.r = r
-    
+        self.adj = None
+
     def adj_normalized(self, adj):
         adj = adj + sp.eye(adj.shape[0])
         
@@ -27,3 +30,15 @@ class LaplacianOperator(BaseOperator):
         adj = d_mat_inv_left @ adj @ d_mat_inv_right
 
         return adj
+    
+    def propagation(self, adj, feature, train_idx, valid_idx, test_idx, name):
+        self.adj = self.adj_normalized(adj)
+
+        x = feature
+
+        # saved = torch.cat((x[train_idx], x[valid_idx], x[test_idx]), dim=0)
+        torch.save(x, f'./dataset/dataset/{name}_0.pt')
+        for i in range(self.hops):
+            x = self.adj @ x
+            # saved = torch.cat((x[train_idx], x[valid_idx], x[test_idx]), dim=0)
+            torch.save(x, f'./dataset/dataset/{name}_{i + 1}.pt')

@@ -28,16 +28,16 @@ class Node:
                 x = torch.FloatTensor(x)
             elif not isinstance(x, Tensor) :
                 raise TypeError("x must be a np.ndarray or Tensor!")
-        self.__x = x
+        self.x = x
 
         if(y is not None):
             if(isinstance(y, np.ndarray)) :
                 y = torch.Tensor(x)
             elif not isinstance(y, Tensor) :
                 raise TypeError("y must be a np.ndarray or Tensor!")
-        self.__y = y
+        self.y = y
 
-        self.__N = N
+        self.N = N
 
 class BaseData:
     def __init__(self, row, col, weight, N, x = None, y = None):
@@ -45,6 +45,10 @@ class BaseData:
         self.__Node = Node(N, x, y)
     def Adj(self):
         return self.__Adj.Adj
+    def X(self):
+        return self.__Node.x
+    def Y(self):
+        return self.__Node.y
 class BaseDataSet:
     def __init__(self, name, root):
         self.name = name

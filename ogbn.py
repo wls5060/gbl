@@ -18,7 +18,7 @@ class Ogbn(BaseDataSet):
         print(data)
 
         split_idx = dataset.get_idx_split()
-        train_idx, val_idx, test_idx = split_idx['train'], split_idx['valid'], split_idx['test']
+        self.train_idx, self.val_idx, self.test_idx = split_idx['train'], split_idx['valid'], split_idx['test']
         
         features, labels = data.x.numpy().astype(np.float32), data.y.to(torch.long).squeeze()
         print(features, '\n', labels)
@@ -33,7 +33,8 @@ class Ogbn(BaseDataSet):
     
     def G(self):
         return self.g
-test = Ogbn("ogbn-arxiv","dataset/dataset/","official")
+test = Ogbn("ogbn-arxiv","dataset/dataset","official")
 trans = LaplacianOperator(1, 0.5)
-adj = trans.adj_normalized(test.G().Adj())
+G = test.G()
+adj = trans.propagation(G.Adj(), G.X(), test.train_idx, test.val_idx, test.test_idx, "ogbn-arxiv")
 # print(adj)
