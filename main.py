@@ -20,14 +20,27 @@ def main(args) :
             train_loader = DataLoader(data.train_idx, batch_size = args.batch_size, shuffle = True)
             val_loader = DataLoader(data.val_idx, batch_size = args.eval_batch_size, shuffle = False)
             test_loader = DataLoader(data.test_idx, batch_size = args.eval_batch_size, shuffle = False)
-        model = models.SGC(1, args.hidden, 1, args.dropout, args.hops, args.r)
+        print(data.g.X().shape[1], data.num_classes)
+        model = models.SGC(data.g.X().shape[1], args.hidden, data.num_classes, args.dropout, args.hops, args.r).to(device)
         optimizer = Adam(model.parameters(), lr=args.lr)
 
     # propagation
-    model.operator.propagation(data.g.Adj(), data.g.X(), args.dataset)
+    model.propagation(data.g.Adj(), data.g.X(), args.dataset)
+    loss_fcn = nn.CrossEntropyLoss()
+    best_val = 0.
+    best_test = 0.
+    
     for epoch in range(args.epoch) :
         gc.collect()
         start = time.time()
+        loss, acc = utils.batch_train(model, len(data.train_idx), data.g.Y(), loss_fcn, optimizer, train_loader, device)
+        acc_val, acc_test = utils.batch_evaluate(model, len(data.val_idx), val_loader,
+                                                        len(data.test_idx), test_loader,
+                                                        data.g.Y(), device)
+        end = time.time()
+        print("epoch : {}, Times:{:.4f}, Train_loss{:.4f}, Train_acc{:.4f},\
+         Val_acc{:.4f}, Test_acc{:.4f}".format(epoch, end - start, loss, acc, acc_val, acc_test))
+        
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -42,5 +55,6 @@ if __name__ == "__main__":
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--batch_size", type=int, default=0)
     parser.add_argument("--eval_batch_size", type=int, default=5000)
+    parser.add_argument("--epoch", type=int, default=500)
     args = parser.parse_args()
     main(args)

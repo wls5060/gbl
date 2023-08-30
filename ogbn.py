@@ -14,6 +14,7 @@ class Ogbn(BaseDataSet):
         
     def process(self):
         dataset = PygNodePropPredDataset(self.name, self.root)
+        self.num_classes = dataset.num_classes
         data = dataset[0]
         print(data)
 

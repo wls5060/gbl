@@ -24,25 +24,43 @@ def set_seed(seed=0):
     torch.backends.cudnn.benchmark = False
     return new_edge_index
 
-def batch_train(model, feats, labels, loss_fcn, optimizer, train_loader, evaluator, dataset):
+def batch_train(model, train_len, labels, loss_fcn, optimizer, train_loader, device):
     model.train()
-    device = labels.device
-    total_loss = 0
-    iter_num = 0
-    y_true = []
-    y_pred = []
+    correct_num = 0
+    loss_train_sum = 0.
+    labels = labels.to(device)
     for batch in train_loader:
-        batch_feats = [x[batch].to(device) for x in feats]
-        output_att = model(batch_feats)
-        y_true.append(labels[batch].to(torch.long))
-        y_pred.append(output_att.argmax(dim=-1))
-        L1 = loss_fcn(output_att, labels[batch].long())
-        loss_train = L1
-        total_loss = loss_train
+        train_output = model.forward(batch, device)
+        loss_train = loss_fcn(train_output, labels[batch])
+
+        y_pred = train_output.argmax(dim=-1)
+        correct_num += y_pred.eq(labels[batch]).double().sum()
+        loss_train_sum += loss_train.item()
+
         optimizer.zero_grad()
         loss_train.backward()
         optimizer.step()
-        iter_num += 1
-    loss = total_loss / iter_num
-    acc = evaluator(torch.cat(y_pred, dim=0), torch.cat(y_true))
-    return loss, acc
+    loss_train = loss_train_sum / len(train_loader)
+    acc_train = correct_num / train_len
+    return loss_train, acc_train
+
+def batch_evaluate(model, val_len, val_loader, test_len, test_loader, labels, device):
+    model.eval()
+    correct_num_val = 0 
+    correct_num_test = 0
+    labels = labels.to(device)
+    for batch in val_loader:
+        val_output = model.forward(batch, device)
+        y_pred = val_output.argmax(dim=-1)
+        # pred = val_output.max(1)[1].type_as(labels)
+        correct_num_val += y_pred.eq(labels[batch]).double().sum()
+    acc_val = correct_num_val / val_len
+
+    for batch in test_loader:
+        test_output = model.forward(batch, device)
+        y_pred = test_output.argmax(dim=-1)
+        # pred = test_output.max(1)[1].type_as(labels)
+        correct_num_test += y_pred.eq(labels[batch]).double().sum()
+    acc_test = correct_num_test / test_len
+
+    return acc_val.item(), acc_test.item()
