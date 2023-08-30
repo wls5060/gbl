@@ -23,7 +23,16 @@ def main(args) :
         print(data.g.X().shape[1], data.num_classes)
         model = models.SGC(data.g.X().shape[1], args.hidden, data.num_classes, args.dropout, args.hops, args.r).to(device)
         optimizer = Adam(model.parameters(), lr=args.lr)
-
+    
+    if args.model == "sign":
+        data = Ogbn(args.dataset, args.root, "official")
+        if(args.batch_size != 0) :
+            train_loader = DataLoader(data.train_idx, batch_size = args.batch_size, shuffle = True)
+            val_loader = DataLoader(data.val_idx, batch_size = args.eval_batch_size, shuffle = False)
+            test_loader = DataLoader(data.test_idx, batch_size = args.eval_batch_size, shuffle = False)
+        print(data.g.X().shape[1], data.num_classes)
+        model = models.SIGN(data.g.X().shape[1] * (args.num_layers + 1), args.hidden, data.num_classes, args.dropout, args.hops, args.r, args.num_layers).to(device)
+        optimizer = Adam(model.parameters(), lr=args.lr)
     # propagation
     model.propagation(data.g.Adj(), data.g.X(), args.dataset)
     loss_fcn = nn.CrossEntropyLoss()
@@ -56,5 +65,8 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int, default=0)
     parser.add_argument("--eval_batch_size", type=int, default=5000)
     parser.add_argument("--epoch", type=int, default=500)
+    parser.add_argument("--num_layers", type=int, default=3)
     args = parser.parse_args()
     main(args)
+
+    # python main.py --dataset ogbn-arxiv --root dataset/dataset/ --gpu 0 --model sign --batch_size 5000 --hidden 2048 --dropout 0.5
