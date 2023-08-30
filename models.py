@@ -14,10 +14,10 @@ class BaseModel(nn.Module):
 
         self.operator = None
         self.transformation = None
-    
+        
 class SGC(BaseModel):
     def __init__(self, in_channels, hidden_channels, out_channels, dropout, hops, r):
-        super(BaseModel, self).__init__(in_channels, hidden_channels, out_channels, dropout)
+        super(SGC, self).__init__(in_channels, hidden_channels, out_channels, dropout)
 
-        self.operator = LaplacianOperator(hops, r)
-test = BaseModel(1,1,1,1)
+        self.operator = operators.LaplacianOperator(hops, r)
+        self.transformation = transformation.LogisticRegression(in_channels, out_channels)

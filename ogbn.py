@@ -33,8 +33,3 @@ class Ogbn(BaseDataSet):
     
     def G(self):
         return self.g
-test = Ogbn("ogbn-arxiv","dataset/dataset","official")
-trans = LaplacianOperator(1, 0.5)
-G = test.G()
-adj = trans.propagation(G.Adj(), G.X(), test.train_idx, test.val_idx, test.test_idx, "ogbn-arxiv")
-# print(adj)
