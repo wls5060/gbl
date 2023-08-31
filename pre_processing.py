@@ -21,7 +21,6 @@ def build_cogdl_graph(name, root):
     edge_index = torch.stack([row, col], dim=0)
     graph = Graph(x=x, edge_index=edge_index, y=y)
     graph.splitted_idx = dataset.get_idx_split()
-
     return graph
 
 
@@ -57,8 +56,6 @@ print('feats', type(feats))
 print("Compute neighbor-averaged feats")
 for hop in tqdm(range(1, args.num_hops + 1)):
     feats.append(torch.from_numpy(Adj.dot(feats[-1])))
-
-    # feats.append(torch.sparse.mm(Adj, feats[-1]))
 
 for i, x in enumerate(feats):
     feats[i] = torch.cat((x[train_nid], x[val_nid], x[test_nid]), dim=0)

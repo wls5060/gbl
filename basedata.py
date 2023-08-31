@@ -18,8 +18,12 @@ class sparse_Adj:
         self.__row = row
         self.__col = col
         self.__weight = weight
-        
         self.Adj = csr_matrix((weight, (row, col)), shape=(N, N))
+    def Adj_row_norm(self):
+        Adj = self.Adj
+        row_norms = np.sqrt(np.power(Adj, 2).sum(axis=1))
+        normalized_sparse_matrix = Adj.multiply(1 / row_norms)
+        return normalized_sparse_matrix
 
 class Node:
     def __init__(self, N, x = None, y = None) :
@@ -51,6 +55,9 @@ class BaseData:
         return self.__Node.y
     def N(self):
         return self.__Node.N
+
+
+
 class BaseDataSet:
     def __init__(self, name, root):
         self.name = name
@@ -58,7 +65,7 @@ class BaseDataSet:
         self.data = None
         self.train_idx, self.val_idx, self.test_idx = None, None, None
         self.process()
-    def process() :
+    def process(self) :
         pass
 if __name__=="__main__":
     row = np.array([0, 0, 1, 2, 2, 2])
