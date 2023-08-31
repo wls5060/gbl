@@ -36,4 +36,24 @@ class SGC(BaseModel):
         feats = self.feats[idx].to(device)
         output = self.transformation(feats)
         return output
+
+class SIGN(BaseModel):
+    def __init__(self, in_channels, hidden_channels, out_channels, dropout, hops, r, num_layers):
+        super(SIGN, self).__init__(in_channels, hidden_channels, out_channels, dropout)
+
+        self.hops = hops
+        self.r = r
+        self.operator = operators.LaplacianOperator(hops, r)
+        self.transformation = transformation.MLP(in_channels, hidden_channels, out_channels, num_layers, dropout)
     
+    def propagation(self, adj, x, dataset):
+        self.operator.propagation(adj, x, dataset)
+        self.feats = torch.FloatTensor(torch.load(f'./dataset/dataset/{dataset}_{0}.pt'))
+        for i in range(self.hops):
+            now_feats = torch.FloatTensor(torch.load(f'./dataset/dataset/{dataset}_{i + 1}.pt'))
+            self.feats = torch.cat([self.feats, now_feats], dim = 1)
+    
+    def forward(self, idx, device):
+        feats = self.feats[idx].to(device)
+        output = self.transformation(feats)
+        return output
